@@ -4,9 +4,13 @@ use modpow::*;
 use num_bigint::BigInt;
 
 pub fn is_prime(n: u64, k: usize) -> bool {
+    if k > 100 {
+        panic!("probability value must be between 0 to 100, got {}.", k);
+    }
     if n <= 3 {
         return n > 1;
-    } else if n % 2 == 0 {
+    } 
+    if n % 2 == 0 {
         return false;
     }
 
