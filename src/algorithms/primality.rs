@@ -5,7 +5,7 @@ use num_bigint::BigInt;
 
 pub fn is_prime(n: u64, k: usize) -> bool {
     if k > 100 {
-        panic!("probability value must be between 0 to 100, got {}.", k);
+        panic!("Probability value must be between 0 to 100, got {}.", k);
     }
     if n <= 3 {
         return n > 1;
@@ -48,4 +48,15 @@ pub fn is_prime(n: u64, k: usize) -> bool {
     }
 
     true
+}
+
+pub fn generate_prime() -> u64 {
+    let mut rng = rand::thread_rng();
+    let mut p: u64 = rng.gen();
+    // let mut q: u64 = rng.gen();
+
+    while !is_prime(p, 5) {
+        p += 1;
+    }
+    p
 }
