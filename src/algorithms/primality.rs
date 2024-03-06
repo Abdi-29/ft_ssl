@@ -1,7 +1,8 @@
+use num::Zero;
 use rand::Rng;
 use modpow::*;
 
-use num_bigint::BigInt;
+use num_bigint::{BigInt, BigUint};
 
 pub fn is_prime(n: u64, k: usize) -> bool {
     if k > 100 {
@@ -61,16 +62,16 @@ pub fn generate_prime() -> u64 {
     p
 }
 
-pub fn gcd(a: u64, b: u64) -> u64{
-    if b == 0 {
-        return a;
+pub fn gcd(a: &BigUint, b: &BigUint) -> BigUint{
+    if b == &BigUint::zero() {
+        return a.clone();
     }
-    return gcd(b, a % b);
+    return gcd(b, &(a % b));
 }
 
-pub fn lcm(a: u64, b: u64) -> u64 {
-    if b == 0 {
-        return a;
+pub fn lcm(a: &BigUint, b: &BigUint) -> BigUint {
+    if b == &BigUint::zero() {
+        return a.clone();
     }
     return (a * b) / gcd(a, b);
 }

@@ -10,3 +10,4 @@ edition = "2021"
 rand = { version = "0.8.5", features = ["small_rng"] }
 modpow = "1.0.1"
 num-bigint = "*"
+num = "*"

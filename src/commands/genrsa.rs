@@ -1,18 +1,26 @@
-use crate::primality::generate_prime;
+use num::{BigUint, One};
+
+use crate::generate_prime;
+use crate::algorithms::primality::lcm;
+// use modpow::*;
 
 pub struct RsaKey {
-    pub modulus: bigUint,
-    pub public_exponent: bigUint,
-    pub private_exponent: bigUint
+    pub modulus: u64,
+    pub public_exponent: u64,
+    pub private_exponent: u64
 }
 
-pub fn generate_rsa_key() -> RsaKey {
-    //Choose two large prime numbers p and q. 
-    let p = generate_prime();
-    let q = generate_prime();
+pub fn generate_rsa_key() -> BigUint {
+    /*Choose two large prime numbers p and q.
+        step 1
+    */
+    let p = &BigUint::from(generate_prime());
+    let q = &BigUint::from(generate_prime());
 
-    //Compute n = pq
-    let modulus = &p * &q;
+    //Compute n = pq -> step 2
+    let modulus: BigUint = p * q;
+    println!("p: {}, q: {} and modulus: {}", p, q, modulus);
+
 
     /*
         Compute λ(n), where λ is Carmichael's totient function.
@@ -22,12 +30,25 @@ pub fn generate_rsa_key() -> RsaKey {
         18446744073709551615 u64
         9223372036854775807 bigUint
     */
-    let totient = lcm(p, q);
-    let public_exponent = 65537;
-    let private_exponent = public_exponent.modpow(u64::one(), totient);
-    RsaKey {
-        modulus,
-        public_exponent,
-        private_exponent
+
+    let totient = lcm(&(p - BigUint::one()), &(q - BigUint::one()));
+    // let public_exponent: BigUint = 65537;
+    // let private_exponent: BigUint = 
+   
+    // RsaKey {
+    //     modulus,
+    //     public_exponent,
+    //     private_exponent
+    // }
+    totient
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_generate_rsa_key() {
+        let test = generate_rsa_key();
+        println!("result: {}", test);
     }
 }

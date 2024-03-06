@@ -1,4 +1,5 @@
 use ft_ssl::algorithms::primality::is_prime;
+use ft_ssl::algorithms::primality::lcm;
 
 #[test]
 fn test_is_prime() {
@@ -29,4 +30,11 @@ fn test_is_prime() {
 #[should_panic(expected = "Probability value must be between 0 to 100, got")]
 fn test_is_prime_panic() {
     is_prime(2, 101);
+}
+
+#[test]
+fn test_lcm() {
+    let result = lcm(60, 52);
+    println!("result: {}", result);
+    assert_eq!(result, 780);
 }
