@@ -1,8 +1,8 @@
-use num::Zero;
+use num::{One, Zero};
 use rand::Rng;
 use modpow::*;
 
-use num_bigint::{BigInt, BigUint};
+use num_bigint::BigInt;
 
 pub fn is_prime(n: u64, k: usize) -> bool {
     if k > 100 {
@@ -26,7 +26,7 @@ pub fn is_prime(n: u64, k: usize) -> bool {
     let mut rng = rand::thread_rng();
 
     for _ in 0..k {
-        let a: u32 = rng.gen_range(2..u32::MAX - 1);
+        let a: u32 = rng.gen_range(2..u32::try_from(n).unwrap() - 1);
         let mut x = modpow(&a.into(), &d, &n);
 
         if x == BigInt::from(1) || x == BigInt::from(n - 1) {
@@ -54,7 +54,6 @@ pub fn is_prime(n: u64, k: usize) -> bool {
 pub fn generate_prime() -> u64 {
     let mut rng = rand::thread_rng();
     let mut p: u32 = rng.gen();
-    // let mut q: u64 = rng.gen();
 
     while !is_prime(p.into(), 5) {
         p += 1;
@@ -62,16 +61,53 @@ pub fn generate_prime() -> u64 {
     p.into()
 }
 
-pub fn gcd(a: &BigUint, b: &BigUint) -> BigUint{
-    if b == &BigUint::zero() {
+pub fn gcd(a: &BigInt, b: &BigInt) -> BigInt{
+    if b == &BigInt::zero() {
         return a.clone();
     }
     return gcd(b, &(a % b));
 }
 
-pub fn lcm(a: &BigUint, b: &BigUint) -> BigUint {
-    if b == &BigUint::zero() {
+pub fn lcm(a: &BigInt, b: &BigInt) -> BigInt {
+    if b == &BigInt::zero() {
         return a.clone();
     }
     return (a * b) / gcd(a, b);
+}
+
+pub fn mod_inverse(mut a: BigInt, mut b: BigInt) -> BigInt {
+    let m = b.clone();
+    let mut y  = BigInt::zero();
+    let mut x = BigInt::one();
+
+    if b == BigInt::one() {
+        return BigInt::zero()
+    }
+    while a > BigInt::one() {
+        let q = a.clone() / b.clone();
+        let mut t = b.clone();
+
+        b = a % b.clone();
+        a = t;
+        t = y.clone();
+
+        y = x - q * y;
+        x = t;
+    }
+    if x < BigInt::zero() {
+        x += m;
+    }
+    return x;
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_mod_inverse() {
+        let a = BigInt::from(17);
+        let b = BigInt::from(780);
+        let result = mod_inverse(a, b);
+        assert_eq!(result, BigInt::from(413));
+    }
 }

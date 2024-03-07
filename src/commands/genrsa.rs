@@ -1,7 +1,7 @@
-use num::{BigUint, One};
+use num::{BigInt, BigUint, One};
 
 use crate::generate_prime;
-use crate::algorithms::primality::lcm;
+use crate::algorithms::primality::{lcm, mod_inverse};
 // use modpow::*;
 
 pub struct RsaKey {
@@ -10,7 +10,7 @@ pub struct RsaKey {
     pub private_exponent: u64
 }
 
-pub fn generate_rsa_key() -> BigUint {
+pub fn generate_rsa_key() -> BigInt {
     /*Choose two large prime numbers p and q.
         step 1
     */
@@ -30,10 +30,15 @@ pub fn generate_rsa_key() -> BigUint {
         18446744073709551615 u64
         9223372036854775807 bigUint
     */
-
-    let totient = lcm(&(p - BigUint::one()), &(q - BigUint::one()));
-    // let public_exponent: BigUint = 65537;
+    let a: BigInt = p.try_into().unwrap();
+    let b: BigInt = q.try_into().unwrap();
+    let totient = lcm(&(a - BigInt::one()), &(b - 1));
+    let public_exponent: BigInt = BigInt::from(65537);
+    let private_exponent = mod_inverse(public_exponent, totient.clone().try_into().unwrap());
+    println!("private_exponent: {}", private_exponent);
     // let private_exponent: BigUint = 
+    //9_223_372_036_854_775_807
+    //170_141_183_460_469_231_731_687_303_715_884_105_727
    
     // RsaKey {
     //     modulus,
