@@ -26,8 +26,8 @@ pub fn is_prime(n: u64, k: usize) -> bool {
     let mut rng = rand::thread_rng();
 
     for _ in 0..k {
-        let a = rng.gen_range(2..n - 1);
-        let mut x = modpow(&a, &d, &n);
+        let a: u32 = rng.gen_range(2..u32::MAX - 1);
+        let mut x = modpow(&a.into(), &d, &n);
 
         if x == BigInt::from(1) || x == BigInt::from(n - 1) {
             continue;
@@ -53,13 +53,13 @@ pub fn is_prime(n: u64, k: usize) -> bool {
 
 pub fn generate_prime() -> u64 {
     let mut rng = rand::thread_rng();
-    let mut p: u64 = rng.gen();
+    let mut p: u32 = rng.gen();
     // let mut q: u64 = rng.gen();
 
-    while !is_prime(p, 5) {
+    while !is_prime(p.into(), 5) {
         p += 1;
     }
-    p
+    p.into()
 }
 
 pub fn gcd(a: &BigUint, b: &BigUint) -> BigUint{

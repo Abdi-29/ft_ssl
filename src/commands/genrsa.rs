@@ -14,11 +14,11 @@ pub fn generate_rsa_key() -> BigUint {
     /*Choose two large prime numbers p and q.
         step 1
     */
-    let p = &BigUint::from(generate_prime());
-    let q = &BigUint::from(generate_prime());
+    let p = generate_prime();
+    let q = generate_prime();
 
     //Compute n = pq -> step 2
-    let modulus: BigUint = p * q;
+    let modulus: u64 = p * q;
     println!("p: {}, q: {} and modulus: {}", p, q, modulus);
 
 
