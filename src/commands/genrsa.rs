@@ -1,4 +1,5 @@
-use num::{BigInt, One};
+use num::One;
+use num_bigint::BigInt;
 
 use crate::generate_prime;
 use crate::algorithms::primality::{lcm, mod_inverse};

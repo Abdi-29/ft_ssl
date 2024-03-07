@@ -1,6 +1,7 @@
-use num::{One, Zero, BigInt};
+use num::{One, Zero};
 use rand::Rng;
 use modpow::*;
+use num_bigint::BigInt;
 
 pub fn is_prime(n: u64, k: usize) -> bool {
     if k > 100 {
