@@ -2,7 +2,7 @@ use num::{One, Zero};
 use rand::Rng;
 use modpow::*;
 
-use num_bigint::BigInt;
+use num::BigInt;
 
 pub fn is_prime(n: u64, k: usize) -> bool {
     if k > 100 {
@@ -29,7 +29,8 @@ pub fn is_prime(n: u64, k: usize) -> bool {
         let a: u32 = rng.gen_range(2..u32::try_from(n).unwrap() - 1);
         let mut x = modpow(&a.into(), &d, &n);
 
-        if x == BigInt::from(1) || x == BigInt::from(n - 1) {
+        let tmp: BigInt = n.try_into().unwrap();
+        if x == BigInt::one() || x == tmp.clone() - BigInt::one() {
             continue;
         }
 
@@ -37,7 +38,7 @@ pub fn is_prime(n: u64, k: usize) -> bool {
         for _ in 1..s {
             x = modpow(&x, &BigInt::from(2), &n);
 
-            if x == BigInt::from(n - 1) {
+            if x == tmp.clone() - BigInt::one() {
                 composite = false;
                 break;
             }
