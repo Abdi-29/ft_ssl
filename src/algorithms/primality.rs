@@ -1,4 +1,5 @@
-use num::{One, Zero, BigInt};
+use num::{One, Zero};
+use num::bigint::BigInt;
 use rand::Rng;
 use modpow::*;
 // use num_bigint::BigInt;
