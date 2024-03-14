@@ -11,7 +11,7 @@ fn main() {
     let n = 7;
     let k = 95;
     println!("testing prime: {}", is_prime(n, k));
-    println!("testing generate_prime {}", generate_prime());
+    // println!("testing generate_prime {} {}", generate_prime());
     // let key = generate_rsa_key();
     // println!("module {}", key.modulus);
     // println!("public {}", key.public_exponent);

@@ -1,5 +1,6 @@
 use ft_ssl::algorithms::primality::is_prime;
 use ft_ssl::algorithms::primality::lcm;
+use num::bigint::ToBigInt;
 
 #[test]
 fn test_is_prime() {
@@ -34,7 +35,7 @@ fn test_is_prime_panic() {
 
 #[test]
 fn test_lcm() {
-    let result = lcm(60, 52);
+    let result = lcm(&60.to_bigint().unwrap(), &52.to_bigint().unwrap());
     println!("result: {}", result);
-    assert_eq!(result, 780);
+    assert_eq!(result, 780.to_bigint().unwrap());
 }

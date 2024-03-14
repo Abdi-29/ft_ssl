@@ -2,7 +2,6 @@ use num::{One, Zero};
 // use num::bigint::BigInt;
 use rand::Rng;
 use modpow::*;
-// use num_num::bigint::BigInt::num::bigint::BigInt;
 
 pub fn is_prime(n: u64, k: usize) -> bool {
     if k > 100 {
@@ -52,14 +51,35 @@ pub fn is_prime(n: u64, k: usize) -> bool {
     true
 }
 
-pub fn generate_prime() -> u64 {
+pub fn get_prime() -> u64 {
     let mut rng = rand::thread_rng();
-    let mut p: u32 = rng.gen();
+    let mut num: u32 = rng.gen();
 
-    while !is_prime(p.into(), 5) {
-        p += 1;
+    while !is_prime(num.into(), 5) {
+        num = rng.gen();
     }
-    p.into()
+    num.into()
+}
+
+pub fn generate_prime() -> (u64, u64) {
+    let mut p: u64;
+    let mut q: u64;
+
+    loop {
+        //p += 1;
+        p = get_prime();
+        q = get_prime();
+
+        print!(".");
+        let modules: u64 = p  * q;
+
+        if modules >> 63 == 1{
+            println!("+++++");
+            break;
+        }
+    }
+    println!("new line");
+    (p.into(), q.into())
 }
 
 pub fn gcd(a: &num::bigint::BigInt, b: &num::bigint::BigInt) -> num::bigint::BigInt{
@@ -101,6 +121,16 @@ pub fn mod_inverse(mut a: num::bigint::BigInt, mut b: num::bigint::BigInt) -> nu
     return x;
 }
 
+fn int_to_bytes(mut num: u64) -> Vec<u8> {
+    let mut bytes = Vec::new();
+    while num > 0 {
+        bytes.push((num & 0xFF) as u8);
+        num >>= 8;
+    }
+    bytes.reverse();
+    bytes
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -110,5 +140,12 @@ mod test {
         let b = num::bigint::BigInt::from(780);
         let result = mod_inverse(a, b);
         assert_eq!(result, num::bigint::BigInt::from(413));
+    }
+
+    #[test]
+    fn test_int_to_bytes() {
+        let num: u64 = 7120255303029382831;
+        let result = int_to_bytes(num);
+        println!("vec: {:?}", result);
     }
 }
