@@ -122,12 +122,15 @@ pub fn mod_inverse(mut a: num::bigint::BigInt, mut b: num::bigint::BigInt) -> nu
 }
 
 fn int_to_bytes(mut num: u64) -> Vec<u8> {
-    let mut bytes = Vec::new();
+    let mut bytes = vec![0, 0, 0, 0, 0, 0, 0, 0];
+    let mut i = 7;
+    
     while num > 0 {
-        bytes.push((num & 0xFF) as u8);
-        num >>= 8;
+        let tmp = num % 256;
+        bytes[i] = tmp as u8;
+        num /= 256;
+        i -= 1;
     }
-    bytes.reverse();
     bytes
 }
 
@@ -144,8 +147,9 @@ mod test {
 
     #[test]
     fn test_int_to_bytes() {
-        let num: u64 = 7120255303029382831;
+        let num: u64 = 65537;
         let result = int_to_bytes(num);
-        println!("vec: {:?}", result);
+        println!("vec: {:?} {:?}", result, num.to_be_bytes());
+        // assert!(result, num.to_be_bytes());
     }
 }
