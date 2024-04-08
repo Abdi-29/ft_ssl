@@ -1,19 +1,36 @@
 pub mod algorithms;
 pub mod commands;
 
+use std::env;
+
 use crate::algorithms::primality::generate_prime;
 
 use crate::algorithms::primality::is_prime;
-// use crate::commands::genrsa::generate_rsa_key;
 
 fn main() {
-    println!("Hello, world!");
-    let n = 7;
-    let k = 95;
-    println!("testing prime: {}", is_prime(n, k));
-    // println!("testing generate_prime {} {}", generate_prime());
-    // let key = generate_rsa_key();
-    // println!("module {}", key.modulus);
-    // println!("public {}", key.public_exponent);
-    // println!("private {}", key.private_exponent);
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() < 2 {
+        panic!("usage: ft_ssl command [command opts] [command args]");
+    }
+    let command = &args[1];
+    
+    match command.as_str() {
+        "genrsa" => genrsa_command(&args[2..]),
+        "rsa" => rsa_command(&args[2..]),
+        "rsault" => rsault_command(&args[2..]),
+        _ => panic!("Error: '{}' is an invalid command.", command)
+    } 
+}
+
+fn genrsa_command(command: &[String]) {
+    println!("command: {:?}", command)
+}
+
+fn rsa_command(command: &[String]) {
+    println!("command: {:?}", command)
+}
+
+fn rsault_command(command: &[String]) {
+    println!("command: {:?}", command)
 }
