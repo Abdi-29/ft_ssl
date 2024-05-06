@@ -5,8 +5,6 @@ use std::env;
 
 use crate::algorithms::primality::generate_prime;
 
-use crate::algorithms::primality::is_prime;
-
 fn main() {
     let args: Vec<String> = env::args().collect();
 

@@ -1,38 +1,8 @@
 use num::{One, BigInt};
-// use num_num::bigint::BigInt::c;
-// use num::num::bigint::BigInt::num::bigint::BigInt;
 use base64;
 use crate::generate_prime;
 use crate::algorithms::primality::{lcm, mod_inverse};
 
-/*
-The content of the RSA private key is as follows:
-
------BEGIN RSA PRIVATE KEY-----
-RSAPrivateKey ::= SEQUENCE {
-  version           Version,
-  modulus           INTEGER,  -- n
-  publicExponent    INTEGER,  -- e
-  privateExponent   INTEGER,  -- d
-  prime1            INTEGER,  -- p
-  prime2            INTEGER,  -- q
-  exponent1         INTEGER,  -- d mod (p-1)
-  exponent2         INTEGER,  -- d mod (q-1)
-  coefficient       INTEGER,  -- (inverse of q) mod p
-  otherPrimeInfos   OtherPrimeInfos OPTIONAL
-}
------END RSA PRIVATE KEY-----
-
-while a RSA public key contains only the following data:
-
------BEGIN RSA PUBLIC KEY-----
-RSAPublicKey ::= SEQUENCE {
-    modulus           INTEGER,  -- n
-    publicExponent    INTEGER   -- e
-}
------END RSA PUBLIC KEY-----
-
-*/
 pub struct RsaKey {
     pub modulus: BigInt,
     pub public_exponent: BigInt,
@@ -42,13 +12,8 @@ pub struct RsaKey {
     pub coefficient: BigInt,
 }
 
-pub fn generate_rsa_key() -> BigInt {
-    /*Choose two large prime numbers p and q.
-        step 1
-    */
+pub fn generate_rsa_key() -> RsaKey {
     let (p, q) = generate_prime();
-
-    //Compute n = pq -> step 2
     let modulus: u64 = p * q;
     println!("p: {}, q: {} and modulus: {}", p, q, modulus);
 
@@ -66,9 +31,7 @@ pub fn generate_rsa_key() -> BigInt {
         prime: [a.clone(), b.clone()],
         exponent: [private_exponent.clone() % (a.clone() - BigInt::one()), private_exponent.clone() % (b.clone() - BigInt::one())],
         coefficient
-    };
-
-    totient
+    }
 }
 
 pub fn encode_integer(der_encoding: &mut Vec<u8>, value: BigInt) {
@@ -96,14 +59,14 @@ fn der_to_pem(der_bytes: &[u8]) -> String {
         base64_encoded
     )
 }
+const ENC_LOOKUP_TABLE: [char; 64] = [
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+    'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
+    'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4',
+    '5', '6', '7', '8', '9', '+', '/'
+];
 
 fn base64_encode(bytes: &[u8]) -> String {
-    let enc_lookup_table: [char; 64] = [
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
-        'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
-        'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4',
-        '5', '6', '7', '8', '9', '+', '/'
-    ];
 
     let mut result = String::new();
     let mut i = 0;
@@ -111,20 +74,20 @@ fn base64_encode(bytes: &[u8]) -> String {
 
     // handle triples of input characters per loop
     while i < index_of_last_complete_triple {
-        result.push(enc_lookup_table[(bytes[i] >> 2) as usize]);
-        result.push(enc_lookup_table[((bytes[i] & 0x03) << 4 | (bytes[i + 1] & 0xF0) >> 4) as usize]);
-        result.push(enc_lookup_table[((bytes[i + 1] & 0x0F) << 2 | (bytes[i + 2] & 0xC0) >> 6) as usize]);
-        result.push(enc_lookup_table[(bytes[i + 2] & 0x3F) as usize]);
+        result.push(ENC_LOOKUP_TABLE[(bytes[i] >> 2) as usize]);
+        result.push(ENC_LOOKUP_TABLE[((bytes[i] & 0x03) << 4 | (bytes[i + 1] & 0xF0) >> 4) as usize]);
+        result.push(ENC_LOOKUP_TABLE[((bytes[i + 1] & 0x0F) << 2 | (bytes[i + 2] & 0xC0) >> 6) as usize]);
+        result.push(ENC_LOOKUP_TABLE[(bytes[i + 2] & 0x3F) as usize]);
         i += 3;
     }
 
     if i < bytes.len() {
         let idx1 = bytes[i];
         let idx2 = if i + 1 < bytes.len() { bytes[i + 1] } else { 0 };
-        result.push(enc_lookup_table[(idx1 >> 2) as usize]);
-        result.push(enc_lookup_table[((idx1 & 0x03) << 4 | (idx2 & 0xF0) >> 4) as usize]);
+        result.push(ENC_LOOKUP_TABLE[(idx1 >> 2) as usize]);
+        result.push(ENC_LOOKUP_TABLE[((idx1 & 0x03) << 4 | (idx2 & 0xF0) >> 4) as usize]);
         if i + 1 < bytes.len() {
-            result.push(enc_lookup_table[((idx2 & 0x0F) << 2) as usize]);
+            result.push(ENC_LOOKUP_TABLE[((idx2 & 0x0F) << 2) as usize]);
         } else {
             result.push('=');
         }
@@ -141,7 +104,17 @@ mod test {
     #[test]
     fn test_generate_rsa_key() {
         let test = generate_rsa_key();
-        println!("result: {}", test);
+        let module = test.modulus.to_bytes_be().1.len();
+        let public = test.public_exponent.to_bytes_be().1.len();
+        let private = test.private_exponent.to_bytes_be().1.len();
+        let prime: usize = test.prime.iter().map(|p| p.to_bytes_be().1.len()).sum();
+        let exponent: usize = test.exponent.iter().map(|e| e.to_bytes_be().1.len()).sum();
+        let coe  = test.coefficient.to_bytes_be().1.len();
+
+        let tot = module + public + private + prime + exponent + coe + 8 as usize;
+        let c = tot.to_be_bytes();
+        let a = base64::encode(c);
+        println!("testing: {:?}", a);
     }
 
     #[test]
