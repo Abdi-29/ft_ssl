@@ -12,13 +12,13 @@ fn main() {
         panic!("usage: ft_ssl command [command opts] [command args]");
     }
     let command = &args[1];
-    
+
     match command.as_str() {
         "genrsa" => genrsa_command(&args[2..]),
         "rsa" => rsa_command(&args[2..]),
         "rsault" => rsault_command(&args[2..]),
-        _ => panic!("Error: '{}' is an invalid command.", command)
-    } 
+        _ => panic!("Error: '{}' is an invalid command.", command),
+    }
 }
 
 fn genrsa_command(command: &[String]) {

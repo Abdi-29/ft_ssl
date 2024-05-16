@@ -24,7 +24,6 @@ fn test_is_prime() {
     for (number, expected) in test_cases.iter() {
         assert_eq!(is_prime(*number, 5), *expected);
     }
-
 }
 
 #[test]

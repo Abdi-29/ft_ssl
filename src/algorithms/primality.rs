@@ -1,7 +1,7 @@
 use num::{One, Zero};
 // use num::bigint::BigInt;
-use rand::Rng;
 use modpow::*;
+use rand::Rng;
 
 pub fn is_prime(n: u64, k: usize) -> bool {
     if k > 100 {
@@ -9,7 +9,7 @@ pub fn is_prime(n: u64, k: usize) -> bool {
     }
     if n <= 3 {
         return n > 1;
-    } 
+    }
     if n % 2 == 0 {
         return false;
     }
@@ -71,9 +71,9 @@ pub fn generate_prime() -> (u64, u64) {
         q = get_prime();
 
         print!(".");
-        let modules: u64 = p  * q;
+        let modules: u64 = p * q;
 
-        if modules >> 63 == 1{
+        if modules >> 63 == 1 {
             println!("+++++");
             break;
         }
@@ -82,7 +82,7 @@ pub fn generate_prime() -> (u64, u64) {
     (p.into(), q.into())
 }
 
-pub fn gcd(a: &num::bigint::BigInt, b: &num::bigint::BigInt) -> num::bigint::BigInt{
+pub fn gcd(a: &num::bigint::BigInt, b: &num::bigint::BigInt) -> num::bigint::BigInt {
     if b == &num::bigint::BigInt::zero() {
         return a.clone();
     }
@@ -98,11 +98,11 @@ pub fn lcm(a: &num::bigint::BigInt, b: &num::bigint::BigInt) -> num::bigint::Big
 
 pub fn mod_inverse(mut a: num::bigint::BigInt, mut b: num::bigint::BigInt) -> num::bigint::BigInt {
     let m = b.clone();
-    let mut y  = num::bigint::BigInt::zero();
+    let mut y = num::bigint::BigInt::zero();
     let mut x = num::bigint::BigInt::one();
 
     if b == num::bigint::BigInt::one() {
-        return num::bigint::BigInt::zero()
+        return num::bigint::BigInt::zero();
     }
     while a > num::bigint::BigInt::one() {
         let q = a.clone() / b.clone();
@@ -124,7 +124,7 @@ pub fn mod_inverse(mut a: num::bigint::BigInt, mut b: num::bigint::BigInt) -> nu
 fn int_to_bytes(mut num: u64) -> Vec<u8> {
     let mut bytes = vec![0, 0, 0, 0, 0, 0, 0, 0];
     let mut i = 7;
-    
+
     while num > 0 {
         let tmp = num % 256;
         bytes[i] = tmp as u8;

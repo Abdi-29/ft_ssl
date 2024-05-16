@@ -1,7 +1,9 @@
-use num::{One, BigInt};
-use base64;
-use crate::generate_prime;
 use crate::algorithms::primality::{lcm, mod_inverse};
+use crate::generate_prime;
+use base64;
+use num::bigint::ToBigInt;
+use num::{BigInt, One};
+use rand::seq;
 
 pub struct RsaKey {
     pub modulus: BigInt,
@@ -22,16 +24,59 @@ pub fn generate_rsa_key() -> RsaKey {
     let totient = lcm(&(a.clone() - BigInt::one()), &(b.clone() - 1));
     let modulus: BigInt = a.clone() * b.clone();
     let public_exponent: BigInt = 65537.into();
-    let private_exponent: BigInt = mod_inverse(public_exponent.clone(), totient.clone().try_into().unwrap());
+    let private_exponent: BigInt =
+        mod_inverse(public_exponent.clone(), totient.clone().try_into().unwrap());
     let coefficient: BigInt = mod_inverse(b.clone(), a.clone());
     RsaKey {
         modulus,
         public_exponent: public_exponent.clone(),
         private_exponent: private_exponent.clone(),
         prime: [a.clone(), b.clone()],
-        exponent: [private_exponent.clone() % (a.clone() - BigInt::one()), private_exponent.clone() % (b.clone() - BigInt::one())],
-        coefficient
+        exponent: [
+            private_exponent.clone() % (a.clone() - BigInt::one()),
+            private_exponent.clone() % (b.clone() - BigInt::one()),
+        ],
+        coefficient,
     }
+}
+
+pub fn encode_integer_2(value: BigInt) -> Vec<u8> {
+    let mut bytes = value.to_bytes_le();
+    let len = bytes.1.len();
+    if len > 1 && bytes.1[len - 1] == 0 {
+        bytes.1.pop();
+    }
+    bytes.1
+}
+
+pub fn encode_sequence(sequences: &[Vec<u8>]) -> Vec<u8> {
+    let mut bytes = vec![];
+
+    for seq in sequences {
+        bytes.extend(encode_length(seq.len()));
+        bytes.extend(seq);
+    }
+    bytes
+}
+
+pub fn encode_length(length: usize) -> Vec<u8> {
+    if length < 127 {
+        vec![length as u8]
+    } else {
+        let mut bytes = vec![];
+        let mut len = length;
+        while len > 0 {
+            bytes.push((len & 0xFF) as u8);
+            len >>= 8;
+        }
+        bytes.push(0x80 | bytes.len() as u8);
+        bytes.reverse();
+        bytes
+    }
+}
+
+pub fn encode_private_key(rsa: RsaKey) {
+    
 }
 
 pub fn encode_integer(der_encoding: &mut Vec<u8>, value: BigInt) {
@@ -39,7 +84,6 @@ pub fn encode_integer(der_encoding: &mut Vec<u8>, value: BigInt) {
 
     der_encoding.extend_from_slice(&value_bytes.1);
 }
-
 
 fn encode_public_key_der(modulus: &BigInt, public_exponent: &BigInt) -> Vec<u8> {
     let mut der_encoding = vec![0x30, 0x82, 0x01, 0xa, 0x02, 0x82, 0x01, 0x01, 0x00];
@@ -63,11 +107,10 @@ const ENC_LOOKUP_TABLE: [char; 64] = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
     'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
     'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4',
-    '5', '6', '7', '8', '9', '+', '/'
+    '5', '6', '7', '8', '9', '+', '/',
 ];
 
 fn base64_encode(bytes: &[u8]) -> String {
-
     let mut result = String::new();
     let mut i = 0;
     let index_of_last_complete_triple = (bytes.len() / 3) * 3;
@@ -75,8 +118,11 @@ fn base64_encode(bytes: &[u8]) -> String {
     // handle triples of input characters per loop
     while i < index_of_last_complete_triple {
         result.push(ENC_LOOKUP_TABLE[(bytes[i] >> 2) as usize]);
-        result.push(ENC_LOOKUP_TABLE[((bytes[i] & 0x03) << 4 | (bytes[i + 1] & 0xF0) >> 4) as usize]);
-        result.push(ENC_LOOKUP_TABLE[((bytes[i + 1] & 0x0F) << 2 | (bytes[i + 2] & 0xC0) >> 6) as usize]);
+        result
+            .push(ENC_LOOKUP_TABLE[((bytes[i] & 0x03) << 4 | (bytes[i + 1] & 0xF0) >> 4) as usize]);
+        result.push(
+            ENC_LOOKUP_TABLE[((bytes[i + 1] & 0x0F) << 2 | (bytes[i + 2] & 0xC0) >> 6) as usize],
+        );
         result.push(ENC_LOOKUP_TABLE[(bytes[i + 2] & 0x3F) as usize]);
         i += 3;
     }
@@ -97,7 +143,6 @@ fn base64_encode(bytes: &[u8]) -> String {
     result
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -109,7 +154,7 @@ mod test {
         let private = test.private_exponent.to_bytes_be().1.len();
         let prime: usize = test.prime.iter().map(|p| p.to_bytes_be().1.len()).sum();
         let exponent: usize = test.exponent.iter().map(|e| e.to_bytes_be().1.len()).sum();
-        let coe  = test.coefficient.to_bytes_be().1.len();
+        let coe = test.coefficient.to_bytes_be().1.len();
 
         let tot = module + public + private + prime + exponent + coe + 8 as usize;
         let c = tot.to_be_bytes();
@@ -123,7 +168,7 @@ mod test {
         println!("test: {}", modulus);
         let public_exponent: BigInt = 65537.into();
         let der_encoding = encode_public_key_der(&modulus, &public_exponent);
-        let mut i = 0; 
+        let mut i = 0;
         for byte in &der_encoding {
             i += 1;
             print!("{:02x} ", byte);
@@ -133,5 +178,23 @@ mod test {
         println!("{}", str);
         let str2 = base64_encode(&der_encoding);
         println!("{}", str2);
+    }
+
+    #[test]
+    fn test_encode_private_key() {
+        let version = 0;
+        let modulus: BigUint = 14012112600880994;
+
+        let sequence = RsaKey {
+            modulus,
+            public_exponent: public_exponent.clone(),
+            private_exponent: private_exponent.clone(),
+            prime: [a.clone(), b.clone()],
+            exponent: [
+                private_exponent.clone() % (a.clone() - BigInt::one()),
+                private_exponent.clone() % (b.clone() - BigInt::one()),
+            ],
+            coefficient,
+        };
     }
 }
