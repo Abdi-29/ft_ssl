@@ -1,5 +1,5 @@
 use num::{One, Zero};
-// use num::bigint::BigInt;
+use num::BigInt;
 use modpow::*;
 use rand::Rng;
 
@@ -152,4 +152,13 @@ mod test {
         println!("vec: {:?} {:?}", result, num.to_be_bytes());
         // assert!(result, num.to_be_bytes());
     }
+}
+
+#[test]
+fn test_some() {
+    let p = BigInt::from(2);
+    let q = BigInt::from(7);
+    let n = p.clone() * q.clone();
+    let e = lcm(&(p.clone() - BigInt::one()), &(q.clone() - 1));
+    println!("n = {}, and e = {}", n, e);
 }
