@@ -145,4 +145,4 @@ pub fn rsa_command(args: &[String]) -> RsaOption {
         i += 1;
     }
     option
- }
+}
