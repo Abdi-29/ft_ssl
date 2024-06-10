@@ -1,5 +1,4 @@
-use num::{One, Zero};
-use num::BigInt;
+use num::{BigInt, One, Zero};
 use modpow::*;
 use rand::Rng;
 
@@ -28,16 +27,16 @@ pub fn is_prime(n: u64, k: usize) -> bool {
         let a: u32 = rng.gen_range(2..u32::try_from(n).unwrap() - 1);
         let mut x = modpow(&a.into(), &d, &n);
 
-        let tmp: num::bigint::BigInt = n.try_into().unwrap();
-        if x == num::bigint::BigInt::one() || x == tmp.clone() - num::bigint::BigInt::one() {
+        let tmp: BigInt = n.try_into().unwrap();
+        if x == BigInt::one() || x == tmp.clone() - BigInt::one() {
             continue;
         }
 
         let mut composite = true;
         for _ in 1..s {
-            x = modpow(&x, &num::bigint::BigInt::from(2), &n);
+            x = modpow(&x, &BigInt::from(2), &n);
 
-            if x == tmp.clone() - num::bigint::BigInt::one() {
+            if x == tmp.clone() - BigInt::one() {
                 composite = false;
                 break;
             }
@@ -82,29 +81,29 @@ pub fn generate_prime() -> (u64, u64) {
     (p.into(), q.into())
 }
 
-pub fn gcd(a: &num::bigint::BigInt, b: &num::bigint::BigInt) -> num::bigint::BigInt {
-    if b == &num::bigint::BigInt::zero() {
+pub fn gcd(a: &BigInt, b: &BigInt) -> BigInt {
+    if b == &BigInt::zero() {
         return a.clone();
     }
     return gcd(b, &(a % b));
 }
 
-pub fn lcm(a: &num::bigint::BigInt, b: &num::bigint::BigInt) -> num::bigint::BigInt {
-    if b == &num::bigint::BigInt::zero() {
+pub fn lcm(a: &BigInt, b: &BigInt) -> BigInt {
+    if b == &BigInt::zero() {
         return a.clone();
     }
     return (a * b) / gcd(a, b);
 }
 
-pub fn mod_inverse(mut a: num::bigint::BigInt, mut b: num::bigint::BigInt) -> num::bigint::BigInt {
+pub fn mod_inverse(mut a: BigInt, mut b: BigInt) -> BigInt {
     let m = b.clone();
-    let mut y = num::bigint::BigInt::zero();
-    let mut x = num::bigint::BigInt::one();
+    let mut y = BigInt::zero();
+    let mut x = BigInt::one();
 
-    if b == num::bigint::BigInt::one() {
-        return num::bigint::BigInt::zero();
+    if b == BigInt::one() {
+        return BigInt::zero();
     }
-    while a > num::bigint::BigInt::one() {
+    while a > BigInt::one() {
         let q = a.clone() / b.clone();
         let mut t = b.clone();
 
@@ -115,7 +114,7 @@ pub fn mod_inverse(mut a: num::bigint::BigInt, mut b: num::bigint::BigInt) -> nu
         y = x - q * y;
         x = t;
     }
-    if x < num::bigint::BigInt::zero() {
+    if x < BigInt::zero() {
         x += m;
     }
     return x;
@@ -139,10 +138,10 @@ mod test {
     use super::*;
     #[test]
     fn test_mod_inverse() {
-        let a = num::bigint::BigInt::from(17);
-        let b = num::bigint::BigInt::from(780);
+        let a = BigInt::from(17);
+        let b = BigInt::from(780);
         let result = mod_inverse(a, b);
-        assert_eq!(result, num::bigint::BigInt::from(413));
+        assert_eq!(result, BigInt::from(413));
     }
 
     #[test]

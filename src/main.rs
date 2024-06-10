@@ -1,9 +1,7 @@
 pub mod algorithms;
 pub mod commands;
-
 use std::env;
-
-use crate::algorithms::primality::generate_prime;
+use crate::commands::rsa::rsa_command;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -15,17 +13,13 @@ fn main() {
 
     match command.as_str() {
         "genrsa" => genrsa_command(&args[2..]),
-        "rsa" => rsa_command(&args[2..]),
+        "rsa" => {rsa_command(&args[2..]);},
         "rsault" => rsault_command(&args[2..]),
         _ => panic!("Error: '{}' is an invalid command.", command),
     }
 }
 
 fn genrsa_command(command: &[String]) {
-    println!("command: {:?}", command)
-}
-
-fn rsa_command(command: &[String]) {
     println!("command: {:?}", command)
 }
 
