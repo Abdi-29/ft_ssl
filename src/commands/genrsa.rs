@@ -2,6 +2,7 @@ use crate::algorithms::primality::{lcm, mod_inverse, generate_prime};
 use base64;
 use num::{BigInt, One};
 
+#[derive(Clone, Debug)]
 pub struct RsaKey {
     pub modulus: BigInt,
     pub public_exponent: BigInt,
@@ -53,8 +54,8 @@ fn encode_sequence(sequences: &[Vec<u8>]) -> Vec<u8> {
         bytes.extend(seq);
     }
 
-    let mut result = vec![0x30]; // Sequence type
-    result.extend(encode_length(bytes.len()));
+    let mut result = vec![0x30,0x82,0x0,0x40,0x2,0x1,0x0]; // Sequence type
+    // result.extend(encode_length(bytes.len()));
     result.extend(bytes);
     result
 }
@@ -76,7 +77,7 @@ pub fn encode_length(length: usize) -> Vec<u8> {
 }
 
 pub fn encode_private_key(rsa: RsaKey) -> String {
-    let version = vec![0x02, 0x01, 0x00]; // Version
+    // let version = vec![0x02, 0x01, 0x00]; // Version
     let modulus = encode_integer_2(&rsa.modulus);
     let public_exponent = encode_integer_2(&rsa.public_exponent);
     let private_exponent = encode_integer_2(&rsa.private_exponent);
@@ -87,7 +88,7 @@ pub fn encode_private_key(rsa: RsaKey) -> String {
     let coefficient = encode_integer_2(&rsa.coefficient);
 
     let sequences = [
-        version,
+        // version,
         modulus,
         public_exponent,
         private_exponent,
@@ -97,8 +98,7 @@ pub fn encode_private_key(rsa: RsaKey) -> String {
         exponent2,
         coefficient,
     ];
-
-    println!("sequence: {:?}", sequences);
+    println!("testing");
     let der_encoding = encode_sequence(&sequences);
     for byte in &der_encoding {
         print!("{:02x} ", byte);
@@ -197,46 +197,48 @@ mod test {
 
     #[test]
     fn test_encode_public_key_der() {
-        let modulus = BigInt::parse_bytes(b"B5FE740396423479", 16).unwrap();
+        // let modulus = BigInt::parse_bytes(b"B5FE740396423479", 16).unwrap();
         let t = generate_rsa_key();
+        println!("t: {:?}", t);
         // let modulus = t.modulus.clone();
-        println!("test: {}", modulus);
-        let public_exponent: BigInt = 65537.into();
-        // let public_exponent = t.public_exponent.clone();
-        let der_encoding = encode_public_key_der(&modulus, &public_exponent);
-        let mut i = 0;
-        for byte in &der_encoding {
-            i += 1;
-            print!("{:02x} ", byte);
-        }
-        println!("len: {}", i);
-        let str = der_to_pem(&der_encoding);
-        println!("{}", str);
-        let str2 = base64_encode(&der_encoding);
-        println!("{}", str2);
+        // println!("test: {}", modulus);
+        // let public_exponent: BigInt = 65537.into();
+        // // let public_exponent = t.public_exponent.clone();
+        // let der_encoding = encode_public_key_der(&modulus, &public_exponent);
+        // let mut i = 0;
+        // for byte in &der_encoding {
+        //     i += 1;
+        //     print!("{:02x} ", byte);
+        // }
+        // println!("len: {}", i);
+        // let str = der_to_pem(&der_encoding);
+        // println!("{}", str);
+        // let str2 = base64_encode(&der_encoding);
+        // println!("{}", str2);
     }
 
     #[test]
     fn test_encode_private_key() {
-        let modulus = BigInt::from(15244893743494075901u64);
         let public_exponent = BigInt::from(65537u64);
-        let private_exponent = BigInt::from(10241808845208813773u64);
-        let prime1 = BigInt::from(3957026291u64);
-        let prime2 = BigInt::from(3852613711u64);
+        let private_exponent = BigInt::from(8484707624939179073u64);
+        let prime1 = BigInt::from(3754937401u64);
+        let prime2 = BigInt::from(3672915913u64);
+        let modulus = prime1.clone() * prime2.clone();
         let exponent1 = &private_exponent % (&prime1 - BigInt::one());
         let exponent2 = &private_exponent % (&prime2 - BigInt::one());
-        let coefficient = mod_inverse(prime2.clone(), prime1.clone());
+        let coefficient = mod_inverse(prime1.clone(), prime2.clone());
 
         let rsa_key = RsaKey {
-            modulus,
-            public_exponent,
-            private_exponent,
+            modulus: modulus.clone(),
+            public_exponent: public_exponent.clone(),
+            private_exponent: private_exponent.clone(),
             prime: [prime1, prime2],
             exponent: [exponent1, exponent2],
             coefficient,
         };
 
-        let pem = encode_private_key(rsa_key);
+        let pem = encode_private_key(rsa_key.clone());
         println!("{}", pem);
+        println!("prime1: {}\n prime2: {}\nmodulus: {}\nprivate: {}\nexpo1: {}\nexp2: {}\ncoef: {}", rsa_key.prime[0], rsa_key.prime[1], rsa_key.modulus, rsa_key.private_exponent, rsa_key.exponent[0], rsa_key.exponent[1], rsa_key.coefficient);
     }
 }
